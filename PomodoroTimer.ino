@@ -21,30 +21,28 @@ void loop() {
   float ay_g = ay / 16384.0;
   float az_g = az / 16384.0;
 
-  // Serial.print(ax_g); Serial.print(" ");
-  // Serial.print(ay_g); Serial.print(" ");
-  // Serial.println(az_g);
 
-  if(ax_g < 0.2 && ax_g > -0.2)    // Screen not facing up or down
-  {
-    if(ay_g < 0.2 && ay_g > -0.2)
+
+    if (az_g > 0.8) 
     {
-      if(az_g<-0.8)
-        Serial.println("Side C");
-
-      if(az_g>0.8)
-        Serial.println("Side A");
+      Serial.println("Side A");
     }
-
-    else if(az_g < 0.2 && az_g > -0.2)
+    else if (az_g < -0.8) 
     {
-      if(ay_g<-0.8)
-        Serial.println("Side D");
-
-      if(ay_g>0.8)
-        Serial.println("Side B");
+      Serial.println("Side C");
     }
-  }
+    else if (ay_g > 0.8) 
+    {
+      Serial.println("Side B");
+    }
+    else if (ay_g < -0.8) 
+    {
+      Serial.println("Side D");
+    }
+    else
+    {
+      Serial.println("Detection Failed");
+    }
 
   delay(500);
 }
