@@ -9,36 +9,32 @@ int current_side=-1;
 int min =0;
 int sec =0;
 
-enum Side
-{
-  Side_A,
-  Side_B,
-  Side_C,
-  Side_D
-};
+unsigned long lastMillis = 0;
+const unsigned long interval = 1000;
 
 void setup() 
 {
   Wire.begin();
   Serial.begin(9600);
 
-
   mpu.initialize();
 
   Serial.println(mpu.testConnection() ? "MPU Not Connected" : "MPU Connected");
-
 }
 
 void loop() 
 {
   current_side= getSide();
-  Serial.println(current_side);
 
-  if(last_side != current_side)
+  if (current_side != last_side) 
   {
     set_new_timer(current_side);
+    printTime();
+    last_side = current_side;
+    delay(2000);
+    // lastMillis = millis();
   }
-
+  runTimer();
   delay(500);
 }
 
@@ -76,7 +72,7 @@ int getSide()
 
 void set_new_timer(int current_side)
 {
-  seconds = 0;
+  sec = 0;
   switch (current_side)
   {
     case 0: min = 5;
@@ -91,3 +87,42 @@ void set_new_timer(int current_side)
 
 }
 
+void runTimer() 
+{
+  if (min == 0 && sec == 0) return; // timer finished
+
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - lastMillis >= interval) 
+  {
+    lastMillis = currentMillis;
+
+    if (sec == 0) 
+    {
+      if (min > 0) 
+      {
+        min--;
+        sec = 59;
+      }
+    } 
+    else 
+    {
+      sec--;
+    }
+
+    printTime();
+  }
+}
+
+void printTime() 
+{
+  if (min < 10)           //minute formatting
+    Serial.print("0");
+  Serial.print(min);
+
+  Serial.print(":");
+
+  if (sec < 10)         // seconds formatting
+    Serial.print("0");
+  Serial.println(sec);
+}
