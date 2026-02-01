@@ -3,17 +3,47 @@
 #include "MPU6050.h"
 
 MPU6050 mpu;
+int last_side=-1;
+int current_side=-1;
 
-void setup() {
+int min =0;
+int sec =0;
+
+enum Side
+{
+  Side_A,
+  Side_B,
+  Side_C,
+  Side_D
+};
+
+void setup() 
+{
   Wire.begin();
   Serial.begin(9600);
 
+
   mpu.initialize();
 
-  Serial.println(mpu.testConnection() ? "MPU Connected" : "MPU Not Connected");
+  Serial.println(mpu.testConnection() ? "MPU Not Connected" : "MPU Connected");
+
 }
 
-void loop() {
+void loop() 
+{
+  current_side= getSide();
+  Serial.println(current_side);
+
+  if(last_side != current_side)
+  {
+    set_new_timer(current_side);
+  }
+
+  delay(500);
+}
+
+int getSide()
+{
   int16_t ax, ay, az;
   mpu.getAcceleration(&ax, &ay, &az);
 
@@ -21,28 +51,43 @@ void loop() {
   float ay_g = ay / 16384.0;
   float az_g = az / 16384.0;
 
-
-
-    if (az_g > 0.8) 
-    {
-      Serial.println("Side A");
-    }
-    else if (az_g < -0.8) 
-    {
-      Serial.println("Side C");
-    }
-    else if (ay_g > 0.8) 
-    {
-      Serial.println("Side B");
-    }
-    else if (ay_g < -0.8) 
-    {
-      Serial.println("Side D");
-    }
-    else
-    {
-      Serial.println("Detection Failed");
-    }
-
-  delay(500);
+  if (az_g > 0.8) 
+  {
+    return 0;
+  }
+  else if (az_g < -0.8) 
+  {
+    return 2;
+  }
+  else if (ay_g > 0.8) 
+  {
+    return 1;
+  }
+  else if (ay_g < -0.8) 
+  {
+    return 3;
+  }
+  else
+  {
+    Serial.println("Detection Failed");
+  }
+  return -1;
 }
+
+void set_new_timer(int current_side)
+{
+  seconds = 0;
+  switch (current_side)
+  {
+    case 0: min = 5;
+            break;
+    case 1: min = 15;
+            break;
+    case 2: min = 30;
+            break;
+    case 3: min = 60;
+            break;
+  }
+
+}
+
