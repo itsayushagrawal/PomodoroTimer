@@ -6,17 +6,26 @@ MPU6050 mpu;
 int last_side=-1;
 int current_side=-1;
 
-int min =0;
-int sec =0;
+int minutes =0;
+int seconds =0;
 
 unsigned long lastMillis = 0;
 const unsigned long interval = 1000;
 
+char timeString[6];
+
+//function prototypes
+// int getSide();
+// void set_new_timer();
+// void runTimer();
+// void printTime();
+
 void setup() 
 {
   Wire.begin();
-  Serial.begin(9600);
-
+  Serial.begin(115200);
+  delay(200);
+  Serial.println("setup started");
   mpu.initialize();
 
   Serial.println(mpu.testConnection() ? "MPU Not Connected" : "MPU Connected");
@@ -32,7 +41,6 @@ void loop()
     printTime();
     last_side = current_side;
     delay(2000);
-    // lastMillis = millis();
   }
   runTimer();
   delay(500);
@@ -72,16 +80,16 @@ int getSide()
 
 void set_new_timer(int current_side)
 {
-  sec = 0;
+  seconds = 0;
   switch (current_side)
   {
-    case 0: min = 5;
+    case 0: minutes = 5;
             break;
-    case 1: min = 15;
+    case 1: minutes = 15;
             break;
-    case 2: min = 30;
+    case 2: minutes = 30;
             break;
-    case 3: min = 60;
+    case 3: minutes = 60;
             break;
   }
 
@@ -89,7 +97,7 @@ void set_new_timer(int current_side)
 
 void runTimer() 
 {
-  if (min == 0 && sec == 0) return; // timer finished
+  if (minutes == 0 && seconds == 0) return; // timer finished
 
   unsigned long currentMillis = millis();
 
@@ -97,17 +105,17 @@ void runTimer()
   {
     lastMillis = currentMillis;
 
-    if (sec == 0) 
+    if (seconds == 0) 
     {
-      if (min > 0) 
+      if (minutes > 0) 
       {
-        min--;
-        sec = 59;
+        minutes--;
+        seconds = 59;
       }
     } 
     else 
     {
-      sec--;
+      seconds--;
     }
 
     printTime();
@@ -116,13 +124,8 @@ void runTimer()
 
 void printTime() 
 {
-  if (min < 10)           //minute formatting
-    Serial.print("0");
-  Serial.print(min);
+  sprintf(timeString,"%02d:%02d",minutes,seconds);
+  Serial.println(timeString);
 
-  Serial.print(":");
 
-  if (sec < 10)         // seconds formatting
-    Serial.print("0");
-  Serial.println(sec);
 }
